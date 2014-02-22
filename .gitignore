@@ -1,0 +1,23 @@
+# Mac specific
+.DS_Store
+
+# Generic Android Ignores
+gen/
+bin/
+classes/
+target/
+build/
+proguard_logs/
+.gradle/
+
+# IDEA Ignores
+*.iml
+*.ipr
+*.iws
+.idea/
+local.properties
+
+# Eclipse 
+.project
+
+# Others / automatically added
