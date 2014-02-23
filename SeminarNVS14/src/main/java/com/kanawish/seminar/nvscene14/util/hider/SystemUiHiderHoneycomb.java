@@ -1,4 +1,4 @@
-package com.kanawish.seminar.nvscene14.util;
+package com.kanawish.seminar.nvscene14.util.hider;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
