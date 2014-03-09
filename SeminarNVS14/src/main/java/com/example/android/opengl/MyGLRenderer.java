@@ -41,8 +41,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     private static final String TAG = "MyGLRenderer";
 //    private Triangle mTriangle;
-    private ImprovedSquare mSquare;
-//	private AutomataProcessor mAutomata;
+//    private ImprovedSquare mSquare;
+	private AutomataProcessor mAutomata;
 
 
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
@@ -66,16 +66,18 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Set the background frame color
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-//        mTriangle = new Triangle();
+/*
+        mTriangle = new Triangle();
 		try {
 			String fshFilename =
-//				"TriangleFractal.fsh.glsl";
-				"Plasma.fsh.glsl";
+				"TriangleFractal.fsh.glsl"; // Buggy on Nexus5.
+//				"Plasma.fsh.glsl"; // Slow on Nexus 5.
 			mSquare = new ImprovedSquare(context,ImprovedSquare.DEFAULT_VERTEX_SHADER, fshFilename);
 		} catch (IOException e) {
 			Log.v(TAG, "Caught an exception with the ImprovedSquare.", e);
 		}
-//		mAutomata = new AutomataProcessor(context);
+*/
+		mAutomata = new AutomataProcessor(context);
 	}
 
     @Override
@@ -109,9 +111,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 //		mTriangle.draw(scratch);
 
 		// Draw square on top, for tests.
-		mSquare.draw(mMVPMatrix);
+//		mSquare.draw(mMVPMatrix);
 
-//		mAutomata.draw(mMVPMatrix);
+		mAutomata.draw(mMVPMatrix);
 	}
 
     @Override
