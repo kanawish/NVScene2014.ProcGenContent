@@ -278,7 +278,7 @@ public class AutomataProcessor {
 		GLES20.glEnableVertexAttribArray(automataProgram.a_position);
 		GLES20.glEnableVertexAttribArray(automataProgram.a_texCoord);
 
-		// Draw the square
+		// Draw the square [TODO fix crash]
 		GLES20.glDrawElements(GLES20.GL_TRIANGLES, drawOrder.length, GLES20.GL_UNSIGNED_SHORT, drawListBuffer);
 
 		GLES20.glDisableVertexAttribArray(automataProgram.a_position);

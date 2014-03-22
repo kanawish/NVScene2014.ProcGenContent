@@ -40,8 +40,9 @@ import java.io.IOException;
 public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     private static final String TAG = "MyGLRenderer";
-//    private Triangle mTriangle;
-//    private ImprovedSquare mSquare;
+
+    private Triangle mTriangle;
+	private ImprovedSquare mSquare;
 	private AutomataProcessor mAutomata;
 
 
@@ -55,9 +56,11 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
 	// TODO: Inject.
 	private final Context context ;
+	private final int mode;
 
-	public MyGLRenderer(Context context) {
+	public MyGLRenderer(Context context, int i) {
 		this.context = context;
+		this.mode = i;
 	}
 
 	@Override
@@ -68,19 +71,38 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
 /*
         mTriangle = new Triangle();
+*/
+		String fshFilename ;
+		switch(this.mode) {
+			case 4 :
+				mTriangle = new Triangle();
+				break;
+			case 3 :
+				mAutomata = new AutomataProcessor(context);
+				break;
+			case 2 :
+				fshFilename = "Plasma.fsh.glsl"; // Slow on Nexus 5.
+				initImprovedSquare(fshFilename);
+				break;
+			case 1 :
+			default :
+				fshFilename = "TriangleFractal.fsh.glsl"; // Buggy on Nexus5.
+				initImprovedSquare(fshFilename);
+				break;
+		}
+
+
+	}
+
+	private void initImprovedSquare(String fshFilename) {
 		try {
-			String fshFilename =
-				"TriangleFractal.fsh.glsl"; // Buggy on Nexus5.
-//				"Plasma.fsh.glsl"; // Slow on Nexus 5.
 			mSquare = new ImprovedSquare(context,ImprovedSquare.DEFAULT_VERTEX_SHADER, fshFilename);
 		} catch (IOException e) {
 			Log.v(TAG, "Caught an exception with the ImprovedSquare.", e);
 		}
-*/
-		mAutomata = new AutomataProcessor(context);
 	}
 
-    @Override
+	@Override
     public void onDrawFrame(GL10 unused) {
         float[] scratch = new float[16];
 
@@ -107,13 +129,25 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // for the matrix multiplication product to be correct.
         Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, mRotationMatrix, 0);
 
-        // Draw triangle
-//		mTriangle.draw(scratch);
+		switch(this.mode) {
+			case 4:
+				// Draw triangle
+				mTriangle.draw(scratch);
+				break;
+			case 3:
+				mAutomata.draw(mMVPMatrix);
+				break;
+			case 2:
+			case 1:
+				// Draw square on top, for tests.
+				mSquare.draw(mMVPMatrix);
+				break;
+			default :
+				// Error worthy..
+				break;
+		}
 
-		// Draw square on top, for tests.
-//		mSquare.draw(mMVPMatrix);
 
-		mAutomata.draw(mMVPMatrix);
 	}
 
     @Override
@@ -127,7 +161,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // this projection matrix is applied to object coordinates
         // in the onDrawFrame() method
         Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
-
     }
 
     /**

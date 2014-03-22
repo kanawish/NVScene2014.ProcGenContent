@@ -29,17 +29,21 @@ public class MyGLSurfaceView extends GLSurfaceView {
 
 	public static final int DEFAULT_RENDER_MODE = GLSurfaceView.RENDERMODE_CONTINUOUSLY;
 
+	public static final String NAMESPACE = "http://schemas.android.com/apk/res-auto";
+
 
 	private final MyGLRenderer mRenderer;
 
 	public MyGLSurfaceView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 
+		int intValue = attrs.getAttributeIntValue(NAMESPACE,"type", 1);
+
 		// Create an OpenGL ES 2.0 context.
 		setEGLContextClientVersion(2);
 
 		// Set the Renderer for drawing on the GLSurfaceView
-		mRenderer = new MyGLRenderer(context);
+		mRenderer = new MyGLRenderer(context,intValue);
 		setRenderer(mRenderer);
 
 		// Render the view only when there is a change in the drawing data
@@ -53,7 +57,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
         setEGLContextClientVersion(2);
 
         // Set the Renderer for drawing on the GLSurfaceView
-        mRenderer = new MyGLRenderer(context);
+        mRenderer = new MyGLRenderer(context,1);
         setRenderer(mRenderer);
 
         // Render the view only when there is a change in the drawing data

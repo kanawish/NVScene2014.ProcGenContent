@@ -9,4 +9,8 @@
         <attr name="metaButtonBarButtonStyle" format="reference" />
     </declare-styleable>
 
+	<declare-styleable name="com.example.android.opengl.MyGLSurfaceView">
+		<attr name="type" format="integer" />
+	</declare-styleable>
+
 </resources>
