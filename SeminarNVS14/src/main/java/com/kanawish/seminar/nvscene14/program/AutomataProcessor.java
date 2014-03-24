@@ -18,6 +18,7 @@ import java.nio.ShortBuffer;
  */
 public class AutomataProcessor {
 
+	private static final String TAG = AutomataProcessor.class.getSimpleName();
 	private final Context context;
 
 	private class AutomataProgram {
@@ -33,6 +34,7 @@ public class AutomataProcessor {
 		int du ;
 		int dv ;
 	}
+
 	private AutomataProgram automataProgram;
 
 
@@ -67,22 +69,43 @@ public class AutomataProcessor {
 	private final int fboB;
 
 
-	float resolutionVec2[] = { 256,256 };
+	private int gridWidth = 128 ;
+	private int gridHeight = 128 ;
+	float gridResolutionVec2[] = { gridWidth,gridHeight };
 
 	private final FloatBuffer vertexBuffer;
+	private final FloatBuffer texelBuffer;
 	private final ShortBuffer drawListBuffer;
 
+	private final ByteBuffer textureOutputBuffer;
+
+	static final int BYTES_PER_FLOAT = 4 ;
+
 	// number of coordinates per vertex in this array
-	static final int COORDS_PER_VERTEX = 5; // x,y,z,u,v
+	static final int COORDS_PER_VERTEX = 3; // x,y,z
 	static float squareCoords[] = {
-			-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,   // top left
-			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,  // bottom left
-			1.0f, -1.0f, 0.0f, 1.0f, 0.0f,  // bottom right
-			1.0f,  1.0f, 0.0f, 1.0f, 1.0f }; // top right
+			-1.0f,  1.0f, 0.0f, // top left
+			-1.0f, -1.0f, 0.0f, // bottom left
+			1.0f, -1.0f, 0.0f,  // bottom right
+			1.0f,  1.0f, 0.0f }; // top right
+
+	private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per coord.
+
+	// coordinates per texel.
+	static final int COORDS_PER_TEXEL = 2; // u,v
+	static float texelCoords[] = {
+			0.0f, 1.0f,   // top left
+			0.0f, 0.0f,  // bottom left
+			1.0f, 0.0f,  // bottom right
+			1.0f, 1.0f }; // top right
+
+	private final int texelStride = COORDS_PER_TEXEL * 4 ; // 4 bytes per coord.
 
 	private final short drawOrder[] = { 0, 1, 2, 0, 2, 3 }; // order to draw vertices
 
-	private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per coord.
+	private ByteBuffer randomByteBuffer;
+	private ByteBuffer purpleByteBuffer;
+	private ByteBuffer yellowByteBuffer;
 
 
 
@@ -90,13 +113,18 @@ public class AutomataProcessor {
 		this.context = context;
 
 		// initialize vertex byte buffer for shape coordinates
-		ByteBuffer bb = ByteBuffer.allocateDirect(
-		// (# of coordinate values * 4 bytes per float)
-		squareCoords.length * 4);
+		ByteBuffer bb = ByteBuffer.allocateDirect(squareCoords.length *BYTES_PER_FLOAT);
 		bb.order(ByteOrder.nativeOrder());
 		vertexBuffer = bb.asFloatBuffer();
 		vertexBuffer.put(squareCoords);
 		vertexBuffer.position(0);
+
+		// init texel byte buffer.
+		ByteBuffer tbb = ByteBuffer.allocateDirect(texelCoords.length*BYTES_PER_FLOAT);
+		tbb.order(ByteOrder.nativeOrder());
+		texelBuffer = tbb.asFloatBuffer();
+		texelBuffer.put(texelCoords);
+		texelBuffer.position(0);
 
 		// initialize byte buffer for the draw list
 		ByteBuffer dlb = ByteBuffer.allocateDirect(
@@ -107,6 +135,9 @@ public class AutomataProcessor {
 		drawListBuffer.put(drawOrder);
 		drawListBuffer.position(0);
 
+		// Can be used to monitor the content of the texture, for debugging or getting results from openGL.
+		textureOutputBuffer = ByteBuffer.allocateDirect(gridWidth * gridHeight * BYTES_PER_FLOAT).order(ByteOrder.nativeOrder());
+
 
 		// TODO: Double check if my understanding is correct: uniforms/attributes are stable after linking.
 		try {
@@ -116,52 +147,91 @@ public class AutomataProcessor {
 			throw new RuntimeException(e);
 		}
 
+		// Random cell start position buffer.
+		byte[] data = new byte[gridWidth*gridHeight*4];
+		byte val = 0 ;
+		for( int i = 0; i < gridWidth*gridHeight*4; i+= 4) {
+			if (Math.random() > 0.5) { val = 0; } else { val = (byte) 255; }
+			data[i] = data[i+1] = data[i+2] = val;
+			data[i+3] = (byte) 255;
+		}
+		randomByteBuffer = ByteBuffer.allocateDirect(gridWidth * gridHeight * 4);
+		randomByteBuffer.put(data);
+		randomByteBuffer.position(0);
 
-		// Create textureA
+		// Purple block for testing.
+		byte[] dataPurple = new byte[gridWidth*gridHeight*4];
+		for( int i = 0; i < gridWidth*gridHeight*4; i+= 4) {
+			data[i] = data[i+2] = (byte) 255; // purple
+			data[i+3] = (byte) 255; // opaque
+		}
+		purpleByteBuffer = ByteBuffer.allocateDirect(gridWidth * gridHeight * 4);
+		purpleByteBuffer.put(data);
+		purpleByteBuffer.position(0);
+
+		// TODO: Double check what exactly works at this stage, glTexImage2D doesn't, so what about TexParam calls?
 		GLES20.glEnable(GLES20.GL_TEXTURE_2D);
+
+		// Create/assign textureA
 		int[] temp = {-1}; GLES20.glGenTextures(1, temp, 0);
 		textureA = temp[0];
+		// Init texture A
+//		initTextureA();
+
+		// Create textureB
+		temp[0] = -1; GLES20.glGenTextures(1, temp, 0);
+		textureB = temp[0];
+		// Init texture B
+//		initTextureB();
+
+		// Create fboA
+		temp[0] = -1 ; GLES20.glGenFramebuffers(1, temp, 0);
+		fboA = temp[0];
+		// init fboA
+//		initFboA();
+
+		// Create fboB
+		temp[0] = -1 ; GLES20.glGenFramebuffers(1, temp, 0);
+		fboB = temp[0];
+		// init fboB
+//		initFboB();
+
+		// *****************
+
+	}
+
+	private void initTextureA() {
+		// Init textureA
+		GLES20.glActiveTexture(GLES20.GL_TEXTURE0); //make texture register 0 active
 		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureA);
 		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
 		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
 		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
 		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
-		GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, 256, 256, 0, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, null);
+		GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, gridWidth, gridHeight, 0, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, null);
+	}
 
-		// Create textureB
-		GLES20.glEnable(GLES20.GL_TEXTURE_2D);
-		temp[0] = -1; GLES20.glGenTextures(1, temp, 0);
-		textureB = temp[0];
+	private void initTextureB() {
+		// Init textureB
+		GLES20.glActiveTexture(GLES20.GL_TEXTURE0); //make texture register 0 active
 		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureB);
 		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
 		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
 		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
 		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
-		byte[] data = new byte[256*256*4];
-		byte val = 0 ;
-		for( int i = 0; i < 256*256*4; i+= 4) {
-			if (Math.random() > 0.5) { val = 0; } else { val = (byte) 255; }
-			data[i] = data[i+1] = data[i+2] = val;
-			data[i+3] = (byte) 255;
-		}
-		ByteBuffer bBufferB = ByteBuffer.allocateDirect( 256*256*4 ); // For GL_RGBA, GL_UNSIGNED_BYTE.
-		bBufferB.put(data);
-		GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, 256, 256, 0, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, bBufferB);
+		GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, gridWidth, gridHeight, 0, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, randomByteBuffer);
+	}
 
-		// Create fboA and attach texture A to it
-		temp[0] = -1 ; GLES20.glGenFramebuffers(1, temp, 0);
-		fboA = temp[0];
+	private void initFboA() {
+		// Attach texture A to fboA
 		GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, fboA);
 		GLES20.glFramebufferTexture2D(GLES20.GL_FRAMEBUFFER, GLES20.GL_COLOR_ATTACHMENT0, GLES20.GL_TEXTURE_2D, textureA, 0);
+	}
 
-		// Create fboB and attach texture B to it
-		temp[0] = -1 ; GLES20.glGenFramebuffers(1, temp, 0);
-		fboB = temp[0];
+	private void initFboB() {
+		// Attach texture B to fboB
 		GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, fboB);
 		GLES20.glFramebufferTexture2D(GLES20.GL_FRAMEBUFFER, GLES20.GL_COLOR_ATTACHMENT0, GLES20.GL_TEXTURE_2D, textureB, 0);
-
-		// *****************
-
 	}
 
 	private AutomataProgram createAutomataProgram() throws IOException {
@@ -223,13 +293,35 @@ public class AutomataProcessor {
 
 	// Probably won't need matrix here...
 	public void draw(float[] mvpMatrix) {
+		// TODO: Fix this hack, init wasn't working from MyGLRenderer.
+		if( pingPongCounter == 0 ) {
+			initTextureA();
+			initFboA();
+			initTextureB();
+			initFboB();
+/*
+			GLES20.glActiveTexture(GLES20.GL_TEXTURE0); //make texture register 0 active
+
+			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureA);
+			GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, gridWidth, gridHeight, 0, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, null);
+
+			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureB);
+			GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, gridWidth, gridHeight, 0, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, randomByteBuffer);
+*/
+		}
 
 		// Drawing to framebuffer
 		if (pingPongCounter % 2 == 0) {
-			framebufferDraw(fboA, textureB);
+			initFboA();
+			readTexture(textureB);
+			framebufferDraw(textureB, fboA);
+			readTexture(textureB);
 			drawTextureToScreen(textureProgram, textureB);
 		} else {
-			framebufferDraw(fboB, textureA);
+			initFboB();
+			readTexture(textureA);
+			framebufferDraw(textureA, fboB);
+			readTexture(textureA);
 			drawTextureToScreen(textureProgram, textureA);
 		}
 
@@ -252,27 +344,31 @@ public class AutomataProcessor {
 		// bind FBO X to set textureX as the output texture.
 		GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, fboOutput);
 
-		// set the viewport to be the size of the texture
-		GLES20.glViewport(0, 0, 256, 256); // TODO: check this does what I think.
-		// Clear the ouput texture
+		// set the viewport to be the size of the texture [taken care of by our renderer.]
+		// GLES20.glViewport(0, 0, 256, 256); // TODO: check this does what I think.
+		// TODO: check on side effects with parent renderer...
+
+		// Clear the bound ouput texture
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
 		// Bind our automata shader
 		GLES20.glUseProgram(automataProgram.program);
 
-		GLES20.glActiveTexture(GLES20.GL_TEXTURE0); //make texture register 0 active
-		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureInput); // bind textureX as our input texture
+		//make texture register 0 active
+		GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+		// bind textureX as our 'input' texture
+		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureInput);
 
 		// TODO: Check this is correct.
 		GLES20.glUniform1i(automataProgram.tex, 0); //pass texture B as a sampler to the shader
-		GLES20.glUniform1f(automataProgram.du, 1.0f / 256.0f); //pass in the width of the cells
-		GLES20.glUniform1f(automataProgram.dv, 1.0f / 256.0f); //pass in the height of the cells
+		GLES20.glUniform1f(automataProgram.du, 1.0f / gridResolutionVec2[0]); //pass in the width of the cells
+		GLES20.glUniform1f(automataProgram.dv, 1.0f / gridResolutionVec2[1]); //pass in the height of the cells
 
 		// Load the vertex position
 		GLES20.glVertexAttribPointer(automataProgram.a_position, 3, GLES20.GL_FLOAT, false, vertexStride, vertexBuffer);
 		// Load the texture coordinate
 		// TODO: Using android offset method, assuming that GLES20 "knows" we're talking about vertexBuffer here...
-		GLES20.glVertexAttribPointer(automataProgram.a_texCoord, 2, GLES20.GL_FLOAT, false, vertexStride, 3);
+		GLES20.glVertexAttribPointer(automataProgram.a_texCoord, 2, GLES20.GL_FLOAT, false, texelStride, texelBuffer);
 
 		// TODO: Check on the right timing to call glDisableVertexAttribArray, if needed...
 		GLES20.glEnableVertexAttribArray(automataProgram.a_position);
@@ -290,18 +386,20 @@ public class AutomataProcessor {
 		// TODO: There's something to be said for creating scope 'manually' with opengl...
 	}
 
-
 	private void drawTextureToScreen(TextureProgram tp, int inputTextureId) {
-		// Clear done by MyGLRenderer. Check if it still makes sense. (I think it does, for cumulative ops)
-		// GLES20.glClearColor(0.0, 0.0, 0.0, 1.0);
-		// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		// Clear done by MyGLRenderer. Check if it still makes sense. (cumulative ops?)
+		GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
 		GLES20.glUseProgram(tp.program);
 
 		// Make texture register 0 active
 		GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+
 		// Bind texture
 		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, inputTextureId);
+//		GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, gridWidth, gridHeight, 0, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, randomByteBuffer);
+
 		// Pass bound texture as a sampler to the shader.
 		GLES20.glUniform1i(tp.tex, 0);
 
@@ -309,8 +407,8 @@ public class AutomataProcessor {
 		// Provide vertex positions
 		GLES20.glVertexAttribPointer(tp.a_position, 3, GLES20.GL_FLOAT, false, vertexStride, vertexBuffer);
 		// Provide texture coordinates
-		// TODO: Using offset, assuming that GLES20 "knows" we're talking about vertexBuffer here...
-		GLES20.glVertexAttribPointer(tp.a_texCoord, 2, GLES20.GL_FLOAT, false, vertexStride, 3);
+		// TODO: Merge both buffers to optimize?
+		GLES20.glVertexAttribPointer(tp.a_texCoord, 2, GLES20.GL_FLOAT, false, texelStride, texelBuffer);
 
 		// TODO: Check on the right timing to call glDisableVertexAttribArray, if needed...
 		GLES20.glEnableVertexAttribArray(tp.a_position);
@@ -323,6 +421,22 @@ public class AutomataProcessor {
 		GLES20.glDisableVertexAttribArray(tp.a_texCoord);
 
 		GLES20.glUseProgram(0);
+	}
+
+
+	// For debugging purposes
+	private void readBoundTexture() {
+		GLES20.glReadPixels(0, 0, gridWidth, gridHeight, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, this.textureOutputBuffer);
+
+		int glGetError = GLES20.glGetError();
+	}
+
+	private void readTexture(int inputTextureId) {
+		GLES20.glActiveTexture(GLES20.GL_TEXTURE0); //make texture register 0 active
+		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, inputTextureId);
+		GLES20.glReadPixels(0, 0, gridWidth, gridHeight, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, this.textureOutputBuffer);
+
+		int glGetError = GLES20.glGetError();
 	}
 
 

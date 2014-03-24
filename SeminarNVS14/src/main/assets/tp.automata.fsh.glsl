@@ -43,8 +43,23 @@ void main() {
 	if (SW.r == 1.0) { count++; }
 
 	if ( (C.r == 0.0 && count == 3) || (C.r == 1.0 && (count == 2 || count == 3))) {
-		gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0); //cell lives...
+	//if( C.r > 0.0 ) { // Trying to see if start conditions are good.
+	//if (true){ // Testing basic rendering
+		if(C.r == 0.0 && count == 3) {
+			gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0); // Cell born (yellow)
+		} else {
+			gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0); // Cell lives on (white)
+		}
 	} else {
-		gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); //cell dies...
+		if( count > 3 ) {
+			gl_FragColor = vec4(0.0, 1.0, 1.0, 1.0); // Cell choked (cyan)
+		} else {
+			if(count>0) {
+				gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+			} else {
+				gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0); // Cell stayed inert (blue)
+			}
+
+		}
 	}
 }

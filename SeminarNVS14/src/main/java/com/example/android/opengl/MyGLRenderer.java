@@ -78,6 +78,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 				mTriangle = new Triangle();
 				break;
 			case 3 :
+				// Too early for calls to glTexImage2D.
 				mAutomata = new AutomataProcessor(context);
 				break;
 			case 2 :

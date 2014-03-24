@@ -22,7 +22,7 @@ import android.view.View;
 public class MainActivity extends Activity {
 
 	/** Hold a reference to our GLSurfaceView */
-	private GLSurfaceView glSurfaceView;
+//	private GLSurfaceView glSurfaceView;
 	private GLSurfaceView glSurfaceView2;
 
 	@Override
@@ -43,7 +43,7 @@ public class MainActivity extends Activity {
 		// Note: We filter in the AndroidManifest, so we don't need to double check if ES 2.0 is supported.
 
 		// Get this reference to call the onResume/onPause of the surface.
-		glSurfaceView = (GLSurfaceView) findViewById(R.id.gl_surface_view);
+//		glSurfaceView = (GLSurfaceView) findViewById(R.id.gl_surface_view);
 		glSurfaceView2 = (GLSurfaceView) findViewById(R.id.gl_surface_view2);
 
 		super.onCreate(savedInstanceState);
@@ -54,7 +54,7 @@ public class MainActivity extends Activity {
 	{
 		// The activity must call the GL surface view's onResume() on activity onResume().
 		super.onResume();
-		glSurfaceView.onResume();
+//		glSurfaceView.onResume();
 		glSurfaceView2.onResume();
 
 	}
@@ -64,7 +64,7 @@ public class MainActivity extends Activity {
 	{
 		// The activity must call the GL surface view's onPause() on activity onPause().
 		super.onPause();
-		glSurfaceView.onPause();
+//		glSurfaceView.onPause();
 		glSurfaceView2.onPause();
 	}
 
