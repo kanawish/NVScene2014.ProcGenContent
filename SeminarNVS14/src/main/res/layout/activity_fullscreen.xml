@@ -37,8 +37,8 @@
 -->
 			<com.example.android.opengl.MyGLSurfaceView
 				android:id="@+id/gl_surface_view2"
-				android:layout_width="128px"
-				android:layout_height="128px"
+				android:layout_width="512px"
+				android:layout_height="512px"
 				android:layout_weight="0"
 				custom:type="3"
 				/>

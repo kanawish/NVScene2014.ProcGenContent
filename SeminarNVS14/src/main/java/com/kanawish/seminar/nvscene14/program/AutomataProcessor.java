@@ -204,8 +204,8 @@ public class AutomataProcessor {
 		// Init textureA
 		GLES20.glActiveTexture(GLES20.GL_TEXTURE0); //make texture register 0 active
 		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureA);
-		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
-		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
+		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_NEAREST);
 		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
 		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
 		GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, gridWidth, gridHeight, 0, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, null);
@@ -215,8 +215,8 @@ public class AutomataProcessor {
 		// Init textureB
 		GLES20.glActiveTexture(GLES20.GL_TEXTURE0); //make texture register 0 active
 		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureB);
-		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
-		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
+		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_NEAREST);
 		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
 		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
 		GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, gridWidth, gridHeight, 0, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, randomByteBuffer);
@@ -345,7 +345,7 @@ public class AutomataProcessor {
 		GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, fboOutput);
 
 		// set the viewport to be the size of the texture [taken care of by our renderer.]
-		// GLES20.glViewport(0, 0, 256, 256); // TODO: check this does what I think.
+		GLES20.glViewport(0, 0, (int)gridResolutionVec2[0], (int)gridResolutionVec2[1]); // TODO: check this does what I think.
 		// TODO: check on side effects with parent renderer...
 
 		// Clear the bound ouput texture
@@ -360,9 +360,11 @@ public class AutomataProcessor {
 		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureInput);
 
 		// TODO: Check this is correct.
-		GLES20.glUniform1i(automataProgram.tex, 0); //pass texture B as a sampler to the shader
-		GLES20.glUniform1f(automataProgram.du, 1.0f / gridResolutionVec2[0]); //pass in the width of the cells
-		GLES20.glUniform1f(automataProgram.dv, 1.0f / gridResolutionVec2[1]); //pass in the height of the cells
+		GLES20.glUniform1i(automataProgram.tex, 0); //pass textureInput as a sampler to the shader
+		float du = 1.0f / gridResolutionVec2[0];
+		GLES20.glUniform1f(automataProgram.du, du); //pass in the width of the cells
+		float dv = 1.0f / gridResolutionVec2[1];
+		GLES20.glUniform1f(automataProgram.dv, dv); //pass in the height of the cells
 
 		// Load the vertex position
 		GLES20.glVertexAttribPointer(automataProgram.a_position, 3, GLES20.GL_FLOAT, false, vertexStride, vertexBuffer);
@@ -387,6 +389,9 @@ public class AutomataProcessor {
 	}
 
 	private void drawTextureToScreen(TextureProgram tp, int inputTextureId) {
+		// TODO: Get viewport dimensions from surfaceview.
+		GLES20.glViewport(0,0,512,512);
+
 		// Clear done by MyGLRenderer. Check if it still makes sense. (cumulative ops?)
 		GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
@@ -398,6 +403,7 @@ public class AutomataProcessor {
 
 		// Bind texture
 		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, inputTextureId);
+		// Debugging
 //		GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, gridWidth, gridHeight, 0, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, randomByteBuffer);
 
 		// Pass bound texture as a sampler to the shader.

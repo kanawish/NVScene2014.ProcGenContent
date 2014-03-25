@@ -42,6 +42,10 @@ void main() {
 	if (SE.r == 1.0) { count++; }
 	if (SW.r == 1.0) { count++; }
 
+//	if( v_texCoord.x < du ) {
+//		gl_FragColor = vec4(1.0,0.0,0.0,1.1);
+//	}
+//	else
 	if ( (C.r == 0.0 && count == 3) || (C.r == 1.0 && (count == 2 || count == 3))) {
 	//if( C.r > 0.0 ) { // Trying to see if start conditions are good.
 	//if (true){ // Testing basic rendering

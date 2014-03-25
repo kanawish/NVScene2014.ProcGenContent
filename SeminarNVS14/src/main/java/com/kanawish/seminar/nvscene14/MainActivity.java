@@ -15,9 +15,6 @@ import android.view.View;
 /**
  * Our main activity.
  *
- * Note: Won't be using UI hiding example, looked janky.
- *
- *
  */
 public class MainActivity extends Activity {
 
