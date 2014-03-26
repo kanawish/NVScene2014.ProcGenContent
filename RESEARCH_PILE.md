@@ -1,33 +1,4 @@
-# NVScene 2014 Prep Notes
-
-## Presentation plan
-
-### First plan
-
-* Basics (intro, examples of uses, etc)
-* Ontogenetic vs Teleological generation
-* Multiple working examples (Fractals, Cellular Automata, Geometry generation, etc)
-* Noise generation
-* Use of Shaders
-	* As part of PG processes.
-	* As visual effect filters (with noise as input)
-* Code optimization for the Tegra 4.
-
-### Second plan
-
-If I present this as a working code lab type project, how do I go about it?
-
-First, I'm thinking a GitHub hosted project, wiki actually are the talk notes / slides / materials.
-
-#### Technical stuff 
-
-That project is a full-fledged gradle project, avoid too many NVidia specifics unless they really bring something crazy to the table. The perf of Tegra 4 can probably be well shown off simply by using GLSL and/or Renderscript.
-
-Renderscript support is now freshly supported in gradle (time of writing, feb 2014) so that holds some interest on it's own.
-
-#### Theoretical stuff
-
-Short Teleological vs Ontogenetic explanation... 
+# Unsorted Research pile
 
 #### Starting blocks: Noise and Simulation
 
@@ -175,35 +146,4 @@ Renderscript
 [Texture buffer approach](http://blog.angusforbes.com/openglglsl-render-to-texture/)
 
 #### Render
-
-
-
-### Toolchain
-
-#### perfhud-es 
-
-http://stackoverflow.com/questions/12414563/nvidia-perfhud-es-tegra-on-google-nexus-7
-
-Mention pidcat, helps with filtering.
-
-Explore the shader tools
-
-
-## Procedural Content Generation and Shaders
-
-Demosceners are no strangers to Procedural Generation. In the early days computing resources were very limited, and Procedural Generation algorithms provided ways to generate complex and entrancing graphical constructs, going beyond simple disk space or memory limitations.
-
-With the mobile revolution upon us, we now all have extremely powerful computers that fit in our pockets. But oddly, we are now faced with new limitations, in the form of bandwith, storage space, etc.
-
-Procedural generation allow us to take simple seeds, and with the right algorithm turn them into massive universes to explore.
-
-This talk will focus on Procedural Content Generation techniques, and how to use them in concert with OpenGL ES Shaders to maximum effect.
-
-Note: This talk will be using the NVidia Shield and Tegra tools suite for it's example code, but could be of interest to anyone new to Procedural Content Generation and Shaders.
-
-## Bio 
-
-### ETIENNE CARON (MR. KHAN / NAID)
-
-An active member of the North American demoscene in the 90s, Etienne was a main organizer for the NAID Demoparties (95/96). Now the Android lead developer for PasswordBox.com, Etienne is also the current lead of GDG Montreal-Android. GDGs are independent, Google backed developer groups. 
 

@@ -1,8 +1,3 @@
-# Procedural Content Generation and Shaders
-
-## by Etienne Caron
-
-This GitHub project will host the demo code and slides for the talk I will be giving at NVScene 2014.
 
 ## Code roadmap
 

@@ -1,19 +1,10 @@
-# NVScene 2014 Presentation - Research
+# Presentation Research Notes
 
 ## Presentation Goals
 
 We'll explore a gammut of procedural content generation techniques, and see how to use GPGPU techniques to turbocharge their performance. 
 
 ## The plan
-
-**Bio / Talk intro** [5m]
-
-
-
-
-**Presentation**
-
-(use star to denote content done, go back to - for images-complete)
 
 - Theory: PCG History, concepts and applications
 	* Use in games 
@@ -24,10 +15,6 @@ We'll explore a gammut of procedural content generation techniques, and see how 
 		* Perlin and Simplex noise.
 		* Fractals, L-Systems
 		* Cell Automata, Genetic algorithms
-	- ~~Applications~~ Dupes the worldGen example at the end.
-		- ~~Creating Landscapes, Simulating Ecosystems.~~
-		- ~~Dungeoneering, maze creation.~~
-		- ~~Assisted Content Creation, Mixed methods.~~
 - Approach: a Small Mobile GPGPU Prototyping Framework
 	- Mobile technology landscape
 		- OpenGL ES 2.0, 3.0 and 3.1
@@ -55,8 +42,6 @@ We'll explore a gammut of procedural content generation techniques, and see how 
 	- Terrain and rivers
 	- Temperature + Precipitation = Biomes
 	- Forests, Dungeons and Politics
-
-**Closing** [5m]
 
 ## The research
 
