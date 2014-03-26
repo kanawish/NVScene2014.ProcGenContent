@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.android.opengl;
+package com.kanawish.seminar.nvscene14.seminar;
 
 import android.content.Context;
 import android.opengl.GLES20;
@@ -27,13 +27,11 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 /**
- * A two-dimensional square for use as a drawn object in OpenGL ES 2.0.
- *
- * [EC] Doing small improvements to facilitate tests and small experiments.
+ * Very simple canvas for fragment shader prototyping.
  */
-public class ImprovedSquare {
+public class ShaderGadget {
 
-	private static final String TAG = ImprovedSquare.class.getSimpleName();
+	private static final String TAG = ShaderGadget.class.getSimpleName();
 
 
 	public static final String DEFAULT_VERTEX_SHADER = "ImprovedSquare.vsh";
@@ -41,10 +39,10 @@ public class ImprovedSquare {
 
 	private final FloatBuffer vertexBuffer;
     private final ShortBuffer drawListBuffer;
-    private final int mProgram;
-    private int mPositionHandle;
-    private int mColorHandle;
-    private int mMVPMatrixHandle;
+    private final int program;
+    private int vPositionHandle;
+    private int vColorHandle;
+    private int uMVPMatrixHandle;
 
 	// For debugging
 	long loopCount = 0 ;
@@ -71,11 +69,9 @@ public class ImprovedSquare {
     float color[] = { 0.2f, 0.709803922f, 0.898039216f, 1.0f };
 
 	/**
-	 *
-	 * @param context
-	 * @throws IOException if there was a problem loading shaders from disk.
+	 * Defaults
 	 */
-	public ImprovedSquare(Context context) throws IOException {
+	public ShaderGadget(Context context) throws IOException {
 		this(context, DEFAULT_VERTEX_SHADER, DEFAULT_FRAGMENT_SHADER);
 	}
 
@@ -83,11 +79,17 @@ public class ImprovedSquare {
      * Sets up the drawing object data for use in an OpenGL ES context.
 	 *
 	 * @throws java.io.IOException if there was a problem loading shaders from disk.
+	 *
+	 * TODO: Change schemes to get the shader code instead of asset filenames.
      */
-    public ImprovedSquare(Context context, String vshFilename, String fshFilename) throws IOException {
+    public ShaderGadget(Context context, String vshFilename, String fshFilename) throws IOException {
+
+		// NOTE: This is where we load shader code from 'disk', see assets folder.
+		// NOTE: Mention IntelliJ basic GLSL syntax highlighter.
 		String vertexShaderCode = IOUtils.loadStringFromAsset(context, vshFilename);
 		String fragmentShaderCode = IOUtils.loadStringFromAsset(context, fshFilename);
 
+		// NOTE: This is how we pass along memory blocks to OpenGL on Android, vs passing pointers in C.
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect(
         // (# of coordinate values * 4 bytes per float)
@@ -106,14 +108,15 @@ public class ImprovedSquare {
         drawListBuffer.put(drawOrder);
         drawListBuffer.position(0);
 
-        // prepare shaders and OpenGL program
-        int vertexShader = MyGLRenderer.loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
-        int fragmentShader = MyGLRenderer.loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
+		// NOTE: This is where we setup the shaders, attach and link them.
+        // Prepare shaders and OpenGL program
+        int vertexShader = ShaderGadgetRenderer.loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
+        int fragmentShader = ShaderGadgetRenderer.loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
 
-        mProgram = GLES20.glCreateProgram();             // create empty OpenGL Program
-        GLES20.glAttachShader(mProgram, vertexShader);   // add the vertex shader to program
-        GLES20.glAttachShader(mProgram, fragmentShader); // add the fragment shader to program
-        GLES20.glLinkProgram(mProgram);                  // create OpenGL program executables
+        program = GLES20.glCreateProgram();             // create empty OpenGL Program
+        GLES20.glAttachShader(program, vertexShader);   // add the vertex shader to program
+        GLES20.glAttachShader(program, fragmentShader); // add the fragment shader to program
+        GLES20.glLinkProgram(program);                  // create OpenGL program executables
     }
 
     /**
@@ -121,6 +124,9 @@ public class ImprovedSquare {
      *
      * @param mvpMatrix - The Model View Project matrix in which to draw
      * this shape.
+	 *
+	 * NOTE: Could be worth asking who in the audience is familiar with shader code, and who is totally new to it.
+	 *
      */
     public void draw(float[] mvpMatrix) {
 		// Our time reference.
@@ -131,57 +137,51 @@ public class ImprovedSquare {
 			timeF = (SystemClock.elapsedRealtime() - systemStartTime) / 1000.0f ;
 		}
 
-//		if( loopCount++ % 60 == 0 ) {
-//			Log.v(TAG, String.format("Time = %s", timeF));
-//		}
-
 		// Add program to OpenGL environment
-        GLES20.glUseProgram(mProgram);
+        GLES20.glUseProgram(program);
 
+		// NOTE: This section is about assigning custom variable that the shader will be accessing.
 		// Get handle to the time uniform.
-		int timeHandle = GLES20.glGetUniformLocation(mProgram,"time");
-		MyGLRenderer.checkGlError("glGetUniformLocation");
+		int timeHandle = GLES20.glGetUniformLocation(program,"time");
 		// Assign time.
 		GLES20.glUniform1f(timeHandle, timeF);
 
-		int resolutionHandle = GLES20.glGetUniformLocation(mProgram,"resolution");
-		MyGLRenderer.checkGlError("glGetUniformLocation");
+		// Resolution
+		int resolutionHandle = GLES20.glGetUniformLocation(program,"resolution");
 		GLES20.glUniform2fv(resolutionHandle,1, resolutionVec2,0);
 
-        // get handle to vertex shader's vPosition member
-        mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
+        // Get a handle to vertex shader's vPosition member
+        vPositionHandle = GLES20.glGetAttribLocation(program, "vPosition");
 
         // Enable a handle to the triangle vertices
-        GLES20.glEnableVertexAttribArray(mPositionHandle);
+        GLES20.glEnableVertexAttribArray(vPositionHandle);
 
-        // Prepare the triangle coordinate data
-        GLES20.glVertexAttribPointer(
-                mPositionHandle, COORDS_PER_VERTEX,
+        // Prepare the triangle coordinate data for our 'shader canvas'
+        GLES20.glVertexAttribPointer(vPositionHandle, COORDS_PER_VERTEX,
                 GLES20.GL_FLOAT, false,
                 vertexStride, vertexBuffer);
 
-        // get handle to fragment shader's vColor member
-        mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
-		MyGLRenderer.checkGlError("glGetUniformLocation");
-
+		// NOTE: Not really used here.
+        // Get handle to fragment shader's vColor member
+        vColorHandle = GLES20.glGetUniformLocation(program, "vColor");
         // Set color for drawing the triangle
-        GLES20.glUniform4fv(mColorHandle, 1, color, 0);
+        GLES20.glUniform4fv(vColorHandle, 1, color, 0);
 
         // get handle to shape's transformation matrix
-        mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
-        MyGLRenderer.checkGlError("glGetUniformLocation");
+        uMVPMatrixHandle = GLES20.glGetUniformLocation(program, "uMVPMatrix");
 
         // Apply the projection and view transformation
-        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
-        MyGLRenderer.checkGlError("glUniformMatrix4fv");
+        GLES20.glUniformMatrix4fv(uMVPMatrixHandle, 1, false, mvpMatrix, 0);
 
+		// NOTE: This is where the fragment shader will be invoked.
+		// TODO: Add a slide or two explaining basics of vertex/fragment shaders to less experienced audiences.
         // Draw the square
         GLES20.glDrawElements(
                 GLES20.GL_TRIANGLES, drawOrder.length,
                 GLES20.GL_UNSIGNED_SHORT, drawListBuffer);
 
         // Disable vertex array
-        GLES20.glDisableVertexAttribArray(mPositionHandle);
+        GLES20.glDisableVertexAttribArray(vPositionHandle);
     }
 
 

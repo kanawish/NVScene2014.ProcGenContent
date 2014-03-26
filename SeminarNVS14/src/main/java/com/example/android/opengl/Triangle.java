@@ -89,10 +89,8 @@ public class Triangle {
         vertexBuffer.position(0);
 
         // prepare shaders and OpenGL program
-        int vertexShader = MyGLRenderer.loadShader(
-                GLES20.GL_VERTEX_SHADER, vertexShaderCode);
-        int fragmentShader = MyGLRenderer.loadShader(
-                GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
+        int vertexShader = MyGLRenderer.loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
+        int fragmentShader = MyGLRenderer.loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
 
         mProgram = GLES20.glCreateProgram();             // create empty OpenGL Program
         GLES20.glAttachShader(mProgram, vertexShader);   // add the vertex shader to program

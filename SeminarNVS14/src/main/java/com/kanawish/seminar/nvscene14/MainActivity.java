@@ -23,6 +23,7 @@ public class MainActivity extends Activity {
 
         setContentView(R.layout.activity_fullscreen);
 
+/*
 		findViewById(R.id.dummy_button).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -31,6 +32,7 @@ public class MainActivity extends Activity {
 				mainImageView.setImageBitmap(SimplexExample.buildBitmapExample1());
 			}
 		});
+*/
 
 		// Note: We filter in the AndroidManifest, so we don't need to double check if ES 2.0 is supported.
 

@@ -8,6 +8,7 @@
 	android:orientation="vertical"
     tools:context="com.kanawish.seminar.nvscene14.MainActivity">
 
+<!--
 	<LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
 
 		<ImageView android:id="@+id/image_view"
@@ -21,6 +22,7 @@
 				android:text="@string/dummy_button" />
 
 	</LinearLayout>
+-->
 
 	<com.example.android.opengl.MyGLSurfaceView
 		android:id="@+id/gl_surface_view"

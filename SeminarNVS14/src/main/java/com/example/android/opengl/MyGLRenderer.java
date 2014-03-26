@@ -160,7 +160,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
 		switch(this.mode) {
 			case 3:
-				mAutomata.onSurfaceSizeChanged(width,height);
+				mAutomata.onSurfaceSizeChanged(width, height);
 				break;
 			case 2:
 			case 1:
@@ -179,12 +179,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     /**
      * Utility method for compiling a OpenGL shader.
      *
-     * <p><strong>Note:</strong> When developing shaders, use the checkGlError()
-     * method to debug shader coding errors.</p>
-     *
      * @param type - Vertex or fragment shader type.
      * @param shaderCode - String containing the shader code.
      * @return - Returns an id for the shader.
+	 *
      */
 	static public int loadShader(int type, String shaderCode){
 

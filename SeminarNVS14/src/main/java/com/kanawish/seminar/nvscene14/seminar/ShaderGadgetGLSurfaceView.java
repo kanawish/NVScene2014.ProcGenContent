@@ -19,7 +19,6 @@ import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-import com.example.android.opengl.MyGLRenderer;
 
 /**
  * A view container where OpenGL ES graphics can be drawn on screen.
@@ -34,15 +33,15 @@ import com.example.android.opengl.MyGLRenderer;
  *
  */
 // NOTE: You typically use GLSurfaceView through sub-classing it, and overriding event methods.
-public class CustomGLSurfaceView extends GLSurfaceView {
+public class ShaderGadgetGLSurfaceView extends GLSurfaceView {
 
 	public static final String NAMESPACE = "http://schemas.android.com/apk/res-auto";
 
 	// NOTE: Unlike a regular View, work is delegated to an instance of the Renderer class.
-	private MyGLRenderer renderer;
+	private ShaderGadgetRenderer renderer;
 
 
-	public CustomGLSurfaceView(Context context, AttributeSet attrs) {
+	public ShaderGadgetGLSurfaceView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 
 		// AttributeSet is provided from xml, see activity_fullscreen.xml
@@ -50,7 +49,7 @@ public class CustomGLSurfaceView extends GLSurfaceView {
 		init(context, intValue);
 	}
 
-	public CustomGLSurfaceView(Context context) {
+	public ShaderGadgetGLSurfaceView(Context context) {
         super(context);
 
         // Create an OpenGL ES 2.0 context.
@@ -69,8 +68,17 @@ public class CustomGLSurfaceView extends GLSurfaceView {
 		// Enable debug mode
 		setDebugFlags(DEBUG_CHECK_GL_ERROR|DEBUG_LOG_GL_CALLS);
 
+		switch(intValue) {
+			case 2 :
+				renderer = new ShaderGadgetRenderer(context,"Plasma.fsh.glsl");
+				break;
+			case 1 :
+			default :
+				renderer = new ShaderGadgetRenderer(context,"TriangleFractal.fsh.glsl");
+				break;
+		}
+
 		// Set the Renderer for drawing on the GLSurfaceView
-		renderer = new MyGLRenderer(context,intValue);
 		setRenderer(renderer);
 
 		// NOTE: You could also decide to only render when surface is dirty.
