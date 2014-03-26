@@ -16,7 +16,7 @@ import java.nio.ShortBuffer;
  * TODO: Implement this example
  * TODO: Make this generic, the class should be more of a texture in/out pipe, the shaders should be bringing the behavior.
  */
-public class AutomataProcessor {
+public class AutomataProcessor implements SizeSensitive {
 
 	private static final String TAG = AutomataProcessor.class.getSimpleName();
 	private final Context context;
@@ -69,8 +69,8 @@ public class AutomataProcessor {
 	private final int fboB;
 
 
-	private int gridWidth = 128 ;
-	private int gridHeight = 128 ;
+	private int gridWidth = 256 ;
+	private int gridHeight = 256 ;
 	float gridResolutionVec2[] = { gridWidth,gridHeight };
 
 	private final FloatBuffer vertexBuffer;
@@ -107,6 +107,8 @@ public class AutomataProcessor {
 	private ByteBuffer purpleByteBuffer;
 	private ByteBuffer yellowByteBuffer;
 
+	private int realWidth=512;
+	private int realHeight=512;
 
 
 	public AutomataProcessor(Context context) {
@@ -290,7 +292,6 @@ public class AutomataProcessor {
 		return tp ;
 	}
 
-
 	// Probably won't need matrix here...
 	public void draw(float[] mvpMatrix) {
 		// TODO: Fix this hack, init wasn't working from MyGLRenderer.
@@ -390,7 +391,7 @@ public class AutomataProcessor {
 
 	private void drawTextureToScreen(TextureProgram tp, int inputTextureId) {
 		// TODO: Get viewport dimensions from surfaceview.
-		GLES20.glViewport(0,0,512,512);
+		GLES20.glViewport(0,0,realWidth,realHeight);
 
 		// Clear done by MyGLRenderer. Check if it still makes sense. (cumulative ops?)
 		GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -446,4 +447,9 @@ public class AutomataProcessor {
 	}
 
 
+	@Override
+	public void onSurfaceSizeChanged(int width, int height) {
+		this.realWidth = width;
+		this.realHeight = height;
+	}
 }

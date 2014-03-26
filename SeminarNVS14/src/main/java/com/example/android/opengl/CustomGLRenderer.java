@@ -15,9 +15,6 @@
  */
 package com.example.android.opengl;
 
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
-
 import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
@@ -26,6 +23,8 @@ import android.util.Log;
 import com.kanawish.seminar.nvscene14.program.AutomataProcessor;
 import com.kanawish.seminar.nvscene14.util.IOUtils;
 
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
 import java.io.IOException;
 
 /**
@@ -37,9 +36,9 @@ import java.io.IOException;
  *   <li>{@link android.opengl.GLSurfaceView.Renderer#onSurfaceChanged}</li>
  * </ul>
  */
-public class MyGLRenderer implements GLSurfaceView.Renderer {
+public class CustomGLRenderer implements GLSurfaceView.Renderer {
 
-    private static final String TAG = "MyGLRenderer";
+    private static final String TAG = "CustomGLRenderer";
 
     private Triangle mTriangle;
 	private ImprovedSquare mSquare;
@@ -58,7 +57,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 	private final Context context ;
 	private final int mode;
 
-	public MyGLRenderer(Context context, int i) {
+	public CustomGLRenderer(Context context, int i) {
 		this.context = context;
 		this.mode = i;
 	}
@@ -160,7 +159,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
 		switch(this.mode) {
 			case 3:
-				mAutomata.onSurfaceSizeChanged(width,height);
+				mAutomata.onSurfaceSizeChanged(width, height);
 				break;
 			case 2:
 			case 1:
@@ -191,20 +190,20 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
         // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
         int shader = GLES20.glCreateShader(type);
-		MyGLRenderer.checkGlError(String.format("glCreateShader %d", type));
+		CustomGLRenderer.checkGlError(String.format("glCreateShader %d", type));
 
         // add the source code to the shader and compile it
         GLES20.glShaderSource(shader, shaderCode);
-		MyGLRenderer.checkGlError(String.format("glShaderSource %s", shaderCode));
+		CustomGLRenderer.checkGlError(String.format("glShaderSource %s", shaderCode));
         GLES20.glCompileShader(shader);
-		MyGLRenderer.checkGlError("glCompileShader");
+		CustomGLRenderer.checkGlError("glCompileShader");
 
         return shader;
     }
 
 	static public int loadShaderAssetFile(Context context, int type, String filename) throws IOException {
 		String shaderCode = IOUtils.loadStringFromAsset(context, filename);
-		return MyGLRenderer.loadShader(type, shaderCode);
+		return CustomGLRenderer.loadShader(type, shaderCode);
 	}
 
     /**
