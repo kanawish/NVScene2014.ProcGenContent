@@ -34,8 +34,8 @@ public class GridRendererSquare {
 	private static final String TAG = GridRendererSquare.class.getSimpleName();
 
 
-	public static final String DEFAULT_VERTEX_SHADER = "ImprovedSquare.vsh";
-	public static final String DEFAULT_FRAGMENT_SHADER = "ImprovedSquare.fsh";
+	public static final String DEFAULT_VERTEX_SHADER = "ImprovedSquare.vsh.glsl";
+	public static final String DEFAULT_FRAGMENT_SHADER = "ImprovedSquare.fsh.glsl";
 
 	private final FloatBuffer vertexBuffer;
     private final ShortBuffer drawListBuffer;

@@ -74,6 +74,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 */
 		String fshFilename ;
 		switch(this.mode) {
+			case 5 :
+				fshFilename = "StaticSineWaves.fsh.glsl"; // Static shader
+				initImprovedSquare(fshFilename);
+				break;
 			case 4 :
 				mTriangle = new Triangle();
 				break;
@@ -138,6 +142,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 			case 3:
 				mAutomata.draw(mMVPMatrix);
 				break;
+			case 5:
 			case 2:
 			case 1:
 				// Draw square on top, for tests.

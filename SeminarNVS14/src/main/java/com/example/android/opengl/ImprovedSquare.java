@@ -36,15 +36,18 @@ public class ImprovedSquare {
 	private static final String TAG = ImprovedSquare.class.getSimpleName();
 
 
-	public static final String DEFAULT_VERTEX_SHADER = "ImprovedSquare.vsh";
-	public static final String DEFAULT_FRAGMENT_SHADER = "ImprovedSquare.fsh";
+	public static final String DEFAULT_VERTEX_SHADER = "ImprovedSquare.vsh.glsl";
+	public static final String DEFAULT_FRAGMENT_SHADER = "ImprovedSquare.fsh.glsl";
 
 	private final FloatBuffer vertexBuffer;
     private final ShortBuffer drawListBuffer;
     private final int mProgram;
-    private int mPositionHandle;
+
+	private int mPositionHandle;
     private int mColorHandle;
     private int mMVPMatrixHandle;
+
+	private int positionHandle;
 
 	// For debugging
 	long loopCount = 0 ;

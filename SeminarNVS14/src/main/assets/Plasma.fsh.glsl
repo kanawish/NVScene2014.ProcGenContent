@@ -2,10 +2,7 @@
 precision mediump float;
 #endif
 
-// modified by @hintz
-
-// uniform vec2 mouse; // not used.
-uniform float time; // Should be in there now.
+uniform float time;
 uniform vec2 resolution;
 uniform vec4 vColor;
 
@@ -15,10 +12,6 @@ uniform vec4 vColor;
 
 void main(void)
 {
-	vec2 center = (gl_FragCoord.xy);
-	center.x=-10.12*sin(time/200.0);
-	center.y=-10.12*cos(time/200.0);
-
 	vec2 v = (gl_FragCoord.xy - resolution/20.0) / min(resolution.y,resolution.x) * 5.0;
 	v.x=v.x-10.0;
 	v.y=v.y-200.0;
