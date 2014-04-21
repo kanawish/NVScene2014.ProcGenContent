@@ -28,7 +28,13 @@
 		android:id="@+id/gl_surface_view"
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent"
-		custom:type="3"/>
-	<!-- 3 for Automata demo, 4 for triangle fractal, 5 for static sinewaves, 2 for 'plasma'.-->
+		custom:type="2"/>
+
+	<!-- Types:
+	2 for 'plasma',
+	3 for Cell-Automata demo,
+	4 for triangle fractal,
+	5 for static sine waves.
+	-->
 
 </LinearLayout>

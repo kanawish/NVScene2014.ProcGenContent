@@ -39,39 +39,42 @@ public class ImprovedSquare {
 	public static final String DEFAULT_VERTEX_SHADER = "ImprovedSquare.vsh.glsl";
 	public static final String DEFAULT_FRAGMENT_SHADER = "ImprovedSquare.fsh.glsl";
 
+	// number of coordinates per vertex in this array
+    private final int COORDS_PER_VERTEX = 3;
+
+    private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
+
+    private float squareCoords[] = {
+            -1.0f,  1.0f, 0.0f,   // top left
+            -1.0f, -1.0f, 0.0f,   // bottom left
+             1.0f, -1.0f, 0.0f,   // bottom right
+             1.0f,  1.0f, 0.0f }; // top right
+
 	private final FloatBuffer vertexBuffer;
     private final ShortBuffer drawListBuffer;
+
     private final int mProgram;
 
-	private int mPositionHandle;
-    private int mColorHandle;
-    private int mMVPMatrixHandle;
-
-	private int positionHandle;
+    private final short drawOrder[] = { 0, 1, 2, 0, 2, 3 }; // order to draw vertices
 
 	// For debugging
 	long loopCount = 0 ;
 
 	// In seconds, initialized to 0 on first call to draw.
 	float timeF = -1 ;
+
 	// Recorded on first call to draw, used to calculate future values of 'time' above.
 	long systemStartTime = SystemClock.elapsedRealtime();
 
 	float resolutionVec2[] = { 256,256 };
-
-	// number of coordinates per vertex in this array
-    static final int COORDS_PER_VERTEX = 3;
-    static float squareCoords[] = {
-            -1.0f,  1.0f, 0.0f,   // top left
-            -1.0f, -1.0f, 0.0f,   // bottom left
-             1.0f, -1.0f, 0.0f,   // bottom right
-             1.0f,  1.0f, 0.0f }; // top right
-
-    private final short drawOrder[] = { 0, 1, 2, 0, 2, 3 }; // order to draw vertices
-
-    private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
-
     float color[] = { 0.2f, 0.709803922f, 0.898039216f, 1.0f };
+
+	private int positionHandle;
+    private int colorHandle;
+    private int mvpMatrixHandle;
+
+	// NOTE: Added for interactivity demo slide
+	private float angle;
 
 	/**
 	 *
@@ -119,6 +122,10 @@ public class ImprovedSquare {
         GLES20.glLinkProgram(mProgram);                  // create OpenGL program executables
     }
 
+	public void setAngle(float angle) {
+		this.angle = angle;
+	}
+
     /**
      * Encapsulates the OpenGL ES instructions for drawing this shape.
      *
@@ -134,12 +141,15 @@ public class ImprovedSquare {
 			timeF = (SystemClock.elapsedRealtime() - systemStartTime) / 1000.0f ;
 		}
 
-//		if( loopCount++ % 60 == 0 ) {
-//			Log.v(TAG, String.format("Time = %s", timeF));
-//		}
-
 		// Add program to OpenGL environment
         GLES20.glUseProgram(mProgram);
+
+		// ********************************
+		// NOTE: Added for example purposes
+		int angleHandle = GLES20.glGetUniformLocation(mProgram,"angle");
+		// Assign angle to shader.
+		GLES20.glUniform1f(angleHandle, angle);
+		// ********************************
 
 		// Get handle to the time uniform.
 		int timeHandle = GLES20.glGetUniformLocation(mProgram,"time");
@@ -152,30 +162,29 @@ public class ImprovedSquare {
 		GLES20.glUniform2fv(resolutionHandle,1, resolutionVec2,0);
 
         // get handle to vertex shader's vPosition member
-        mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
+        positionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
 
         // Enable a handle to the triangle vertices
-        GLES20.glEnableVertexAttribArray(mPositionHandle);
+        GLES20.glEnableVertexAttribArray(positionHandle);
 
         // Prepare the triangle coordinate data
-        GLES20.glVertexAttribPointer(
-                mPositionHandle, COORDS_PER_VERTEX,
+        GLES20.glVertexAttribPointer(positionHandle, COORDS_PER_VERTEX,
                 GLES20.GL_FLOAT, false,
                 vertexStride, vertexBuffer);
 
         // get handle to fragment shader's vColor member
-        mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
+        colorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
 		MyGLRenderer.checkGlError("glGetUniformLocation");
 
         // Set color for drawing the triangle
-        GLES20.glUniform4fv(mColorHandle, 1, color, 0);
+        GLES20.glUniform4fv(colorHandle, 1, color, 0);
 
         // get handle to shape's transformation matrix
-        mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+        mvpMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
         MyGLRenderer.checkGlError("glGetUniformLocation");
 
         // Apply the projection and view transformation
-        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
+        GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false, mvpMatrix, 0);
         MyGLRenderer.checkGlError("glUniformMatrix4fv");
 
         // Draw the square
@@ -184,7 +193,7 @@ public class ImprovedSquare {
                 GLES20.GL_UNSIGNED_SHORT, drawListBuffer);
 
         // Disable vertex array
-        GLES20.glDisableVertexAttribArray(mPositionHandle);
+        GLES20.glDisableVertexAttribArray(positionHandle);
     }
 
 

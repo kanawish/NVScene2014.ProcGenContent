@@ -41,9 +41,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     private static final String TAG = "MyGLRenderer";
 
-    private Triangle mTriangle;
-	private ImprovedSquare mSquare;
-	private AutomataProcessor mAutomata;
+    private Triangle triangle;
+	private ImprovedSquare square;
+	private AutomataProcessor automataProcessor;
 
 
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
@@ -69,9 +69,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Set the background frame color
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-/*
-        mTriangle = new Triangle();
-*/
 		String fshFilename ;
 		switch(this.mode) {
 			case 5 :
@@ -79,11 +76,11 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 				initImprovedSquare(fshFilename);
 				break;
 			case 4 :
-				mTriangle = new Triangle();
+				triangle = new Triangle();
 				break;
 			case 3 :
 				// Too early for calls to glTexImage2D.
-				mAutomata = new AutomataProcessor(context);
+				automataProcessor = new AutomataProcessor(context);
 				break;
 			case 2 :
 				fshFilename = "Plasma.fsh.glsl"; // Slow on Nexus 5.
@@ -101,7 +98,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
 	private void initImprovedSquare(String fshFilename) {
 		try {
-			mSquare = new ImprovedSquare(context,ImprovedSquare.DEFAULT_VERTEX_SHADER, fshFilename);
+			square = new ImprovedSquare(context,ImprovedSquare.DEFAULT_VERTEX_SHADER, fshFilename);
 		} catch (IOException e) {
 			Log.v(TAG, "Caught an exception with the ImprovedSquare.", e);
 		}
@@ -137,16 +134,18 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		switch(this.mode) {
 			case 4:
 				// Draw triangle
-				mTriangle.draw(scratch);
+				triangle.draw(scratch);
 				break;
 			case 3:
-				mAutomata.draw(mMVPMatrix);
+				automataProcessor.draw(mMVPMatrix);
 				break;
 			case 5:
 			case 2:
 			case 1:
 				// Draw square on top, for tests.
-				mSquare.draw(mMVPMatrix);
+				square.draw(mMVPMatrix);
+				// NOTE: Added for quick interactivity example.
+				square.setAngle(mAngle);
 				break;
 			default :
 				// Error worthy..
@@ -165,7 +164,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
 		switch(this.mode) {
 			case 3:
-				mAutomata.onSurfaceSizeChanged(width, height);
+				automataProcessor.onSurfaceSizeChanged(width, height);
 				break;
 			case 2:
 			case 1:
