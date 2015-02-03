@@ -1,24 +1,25 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:0.9.+'
-    }
-}
-apply plugin: 'android'
+// This is where we set up javadoc/source browsing.
+apply plugin: 'idea'
+idea{
+    module {
+        // if you love browsing Javadoc
+        downloadJavadoc = true
 
-repositories {
-    mavenCentral()
+        // and love reading sources
+        downloadSources = true
+    }
 }
+
+apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion "19.0.3"
+    compileSdkVersion 21
+    buildToolsVersion "21.1.2"
 
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 19
+        applicationId "com.kanawish.perf"
+        minSdkVersion 15
+        targetSdkVersion 21
         versionCode 1
         versionName "1.0"
     }
@@ -30,12 +31,14 @@ android {
 
     buildTypes {
         release {
-            runProguard false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 }
 
 dependencies {
-//    compile 'com.android.support:support-v4:18.0.0'
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+
+    compile 'com.google.android.gms:play-services:6.5.87'
 }
